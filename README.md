@@ -1,5 +1,7 @@
 # YOLACT for Ikomia
 
+![](https://blog.ikomia.com/wp-content/uploads/2021/02/yolact.jpg)
+
 This plugin is based on  [dbolya project](https://github.com/dbolya/yolact).
 
 It provides a ready to use method to evaluate the YOLACT instance segmentation algorithm in Ikomia software.
