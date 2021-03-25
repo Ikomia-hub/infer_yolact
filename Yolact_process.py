@@ -142,7 +142,7 @@ class YolactProcessFactory(dataprocess.CProcessFactory):
                                 "close to the state-of-the-art approaches while still running at real-time."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Segmentation"
-        self.info.version = "1.0.0"
+        self.info.version = "1.0.1"
         self.info.iconPath = "icon/icon.png"
         self.info.authors = "Daniel Bolya, Chong Zhou, Fanyi Xiao, Yong Jae Lee"
         self.info.article = "YOLACT++: Better Real-time Instance Segmentation"
