@@ -1,6 +1,7 @@
 from ikomia import utils, core, dataprocess
-import Yolact_process as processMod
-#PyQt GUI framework
+from ikomia.utils import qtconversion
+from Yolact.Yolact_process import YolactParam
+# PyQt GUI framework
 from PyQt5.QtWidgets import *
 
 
@@ -8,13 +9,13 @@ from PyQt5.QtWidgets import *
 # - Class which implements widget associated with the process
 # - Inherits core.CProtocolTaskWidget from Ikomia API
 # --------------------
-class YolactWidget(core.CProtocolTaskWidget):
+class YolactWidget(core.CWorkflowTaskWidget):
 
     def __init__(self, param, parent):
-        core.CProtocolTaskWidget.__init__(self, parent)
+        core.CWorkflowTaskWidget.__init__(self, parent)
 
         if param is None:
-            self.parameters = processMod.YolactParam()
+            self.parameters = YolactParam()
         else:
             self.parameters = param
 
@@ -61,7 +62,7 @@ class YolactWidget(core.CProtocolTaskWidget):
         self.grid_layout.addWidget(self.checkbox, 3, 0, 1, 2)
 
         # PyQt -> Qt wrapping
-        layout_ptr = utils.PyQtToQt(self.grid_layout)
+        layout_ptr = qtconversion.PyQtToQt(self.grid_layout)
 
         # Set widget layout
         self.setLayout(layout_ptr)
@@ -81,10 +82,10 @@ class YolactWidget(core.CProtocolTaskWidget):
         self.emitApply(self.parameters)
 
 
-#--------------------
-#- Factory class to build process widget object
-#- Inherits dataprocess.CWidgetFactory from Ikomia API
-#--------------------
+# --------------------
+# - Factory class to build process widget object
+# - Inherits dataprocess.CWidgetFactory from Ikomia API
+# --------------------
 class YolactWidgetFactory(dataprocess.CWidgetFactory):
 
     def __init__(self):

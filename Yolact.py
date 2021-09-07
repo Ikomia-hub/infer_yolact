@@ -1,8 +1,7 @@
 from ikomia import dataprocess
-import Yolact_process as processMod
-import Yolact_widget as widgetMod
 import os
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 # --------------------
@@ -15,9 +14,11 @@ class Yolact(dataprocess.CPluginProcessInterface):
         dataprocess.CPluginProcessInterface.__init__(self)
 
     def getProcessFactory(self):
+        from Yolact.Yolact_process import YolactProcessFactory
         # Instantiate process object
-        return processMod.YolactProcessFactory()
+        return YolactProcessFactory()
 
     def getWidgetFactory(self):
+        from Yolact.Yolact_widget import YolactWidgetFactory
         # Instantiate associated widget object
-        return widgetMod.YolactWidgetFactory()
+        return YolactWidgetFactory()

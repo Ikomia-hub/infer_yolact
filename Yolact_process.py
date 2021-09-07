@@ -1,18 +1,17 @@
 from ikomia import core, dataprocess
 import copy
-# Your imports below
 import os
-import Yolact_wrapper as yw
+import Yolact.Yolact_wrapper as yw
 
 
 # --------------------
 # - Class to handle the process parameters
 # - Inherits core.CProtocolTaskParam from Ikomia API
 # --------------------
-class YolactParam(core.CProtocolTaskParam):
+class YolactParam(core.CWorkflowTaskParam):
 
     def __init__(self):
-        core.CProtocolTaskParam.__init__(self)
+        core.CWorkflowTaskParam.__init__(self)
         # Place default value initialization here        
         models_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
         self.model_path = models_folder + "/yolact_im700_54_800000.pth"
@@ -21,37 +20,37 @@ class YolactParam(core.CProtocolTaskParam):
         self.mask_alpha = 0.45
         self.device = "cuda"
 
-    def setParamMap(self, paramMap):
+    def setParamMap(self, param_map):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
-        self.confidence = float(paramMap["confidence"])
-        self.top_k = float(paramMap["top_k"])
-        self.mask_alpha = float(paramMap["mask_alpha"])
-        self.device = paramMap["device"]
+        self.confidence = float(param_map["confidence"])
+        self.top_k = float(param_map["top_k"])
+        self.mask_alpha = float(param_map["mask_alpha"])
+        self.device = param_map["device"]
 
     def getParamMap(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
-        paramMap = core.ParamMap()
-        paramMap["confidence"] = str(self.confidence)
-        paramMap["top_k"] = str(self.top_k)
-        paramMap["mask_alpha"] = str(self.mask_alpha)
-        paramMap["device"] = self.device
-        return paramMap
+        param_map = core.ParamMap()
+        param_map["confidence"] = str(self.confidence)
+        param_map["top_k"] = str(self.top_k)
+        param_map["mask_alpha"] = str(self.mask_alpha)
+        param_map["device"] = self.device
+        return param_map
 
 
 # --------------------
 # - Class which implements the process
 # - Inherits core.CProtocolTask or derived from Ikomia API
 # --------------------
-class YolactProcess(dataprocess.CImageProcess2d):
+class YolactProcess(dataprocess.C2dImageTask):
 
     def __init__(self, name, param):
-        dataprocess.CImageProcess2d.__init__(self, name)
+        dataprocess.C2dImageTask.__init__(self, name)
         
         # Add input/output of the process here
         self.setOutputDataType(core.IODataType.IMAGE_LABEL, 0)
-        self.addOutput(dataprocess.CImageProcessIO(core.IODataType.IMAGE))
+        self.addOutput(dataprocess.CImageIO(core.IODataType.IMAGE))
         # Add graphics output
         self.addOutput(dataprocess.CGraphicsOutput())
         self.net = None
@@ -116,10 +115,10 @@ class YolactProcess(dataprocess.CImageProcess2d):
 # - Factory class to build process object
 # - Inherits dataprocess.CProcessFactory from Ikomia API
 # --------------------
-class YolactProcessFactory(dataprocess.CProcessFactory):
+class YolactProcessFactory(dataprocess.CTaskFactory):
 
     def __init__(self):
-        dataprocess.CProcessFactory.__init__(self)
+        dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
         self.info.name = "Yolact"
         self.info.shortDescription = "A simple, fully convolutional model for real-time instance segmentation."

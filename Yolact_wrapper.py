@@ -2,11 +2,11 @@ from ikomia import core
 import torch
 import torch.backends.cudnn as torch_cudnn
 from collections import defaultdict
-from yolact_git.yolact import Yolact
-from yolact_git.utils.functions import SavePath
-from yolact_git.utils.augmentations import FastBaseTransform, FastBaseTransformCPU
-from yolact_git.data import cfg, set_cfg, COLORS
-from yolact_git.layers.output_utils import postprocess
+from Yolact.yolact_git.yolact import Yolact
+from Yolact.yolact_git.utils.functions import SavePath
+from Yolact.yolact_git.utils.augmentations import FastBaseTransform, FastBaseTransformCPU
+from Yolact.yolact_git.data import cfg, set_cfg, COLORS
+from Yolact.yolact_git.layers.output_utils import postprocess
 
 
 color_cache = defaultdict(lambda: {})
