@@ -148,7 +148,8 @@ def manage_outputs(predictions, img, param, graphics_output):
             if display_bboxes:
                 rect_prop = core.GraphicsRectProperty()
                 rect_prop.pen_color = list(color)
-                graphics_output.addRectangle(float(x1), float(y1), float(x2-x1), float(y2-y1), rect_prop)
+                graphics_box = graphics_output.addRectangle(float(x1), float(y1), float(x2-x1), float(y2-y1), rect_prop)
+                graphics_box.setCategory(cfg.dataset.class_names[classes[j]])
 
             if display_text:
                 _class = cfg.dataset.class_names[classes[j]]
