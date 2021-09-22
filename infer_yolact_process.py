@@ -1,14 +1,14 @@
 from ikomia import core, dataprocess
 import copy
 import os
-import Yolact.Yolact_wrapper as yw
+import infer_yolact.yolact_wrapper as yw
 
 
 # --------------------
 # - Class to handle the process parameters
 # - Inherits core.CProtocolTaskParam from Ikomia API
 # --------------------
-class YolactParam(core.CWorkflowTaskParam):
+class InferYolactParam(core.CWorkflowTaskParam):
 
     def __init__(self):
         core.CWorkflowTaskParam.__init__(self)
@@ -43,7 +43,7 @@ class YolactParam(core.CWorkflowTaskParam):
 # - Class which implements the process
 # - Inherits core.CProtocolTask or derived from Ikomia API
 # --------------------
-class YolactProcess(dataprocess.C2dImageTask):
+class InferYolact(dataprocess.C2dImageTask):
 
     def __init__(self, name, param):
         dataprocess.C2dImageTask.__init__(self, name)
@@ -58,7 +58,7 @@ class YolactProcess(dataprocess.C2dImageTask):
 
         # Create parameters class
         if param is None:
-            self.setParam(YolactParam())
+            self.setParam(InferYolactParam())
         else:
             self.setParam(copy.deepcopy(param))
 
@@ -115,12 +115,12 @@ class YolactProcess(dataprocess.C2dImageTask):
 # - Factory class to build process object
 # - Inherits dataprocess.CProcessFactory from Ikomia API
 # --------------------
-class YolactProcessFactory(dataprocess.CTaskFactory):
+class InferYolactFactory(dataprocess.CTaskFactory):
 
     def __init__(self):
         dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
-        self.info.name = "Yolact"
+        self.info.name = "infer_yolact"
         self.info.shortDescription = "A simple, fully convolutional model for real-time instance segmentation."
         self.info.description = "We present a simple, fully-convolutional model for real-time (>30 fps) instance " \
                                 "segmentation that achieves competitive results on MS COCO evaluated on a single " \
@@ -154,4 +154,4 @@ class YolactProcessFactory(dataprocess.CTaskFactory):
 
     def create(self, param=None):
         # Create process object
-        return YolactProcess(self.info.name, param)
+        return InferYolact(self.info.name, param)

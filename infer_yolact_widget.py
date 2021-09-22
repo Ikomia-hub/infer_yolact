@@ -1,6 +1,6 @@
 from ikomia import utils, core, dataprocess
 from ikomia.utils import qtconversion
-from Yolact.Yolact_process import YolactParam
+from infer_yolact.infer_yolact_process import InferYolactParam
 # PyQt GUI framework
 from PyQt5.QtWidgets import *
 
@@ -9,13 +9,13 @@ from PyQt5.QtWidgets import *
 # - Class which implements widget associated with the process
 # - Inherits core.CProtocolTaskWidget from Ikomia API
 # --------------------
-class YolactWidget(core.CWorkflowTaskWidget):
+class InferYolactWidget(core.CWorkflowTaskWidget):
 
     def __init__(self, param, parent):
         core.CWorkflowTaskWidget.__init__(self, parent)
 
         if param is None:
-            self.parameters = YolactParam()
+            self.parameters = InferYolactParam()
         else:
             self.parameters = param
 
@@ -86,13 +86,13 @@ class YolactWidget(core.CWorkflowTaskWidget):
 # - Factory class to build process widget object
 # - Inherits dataprocess.CWidgetFactory from Ikomia API
 # --------------------
-class YolactWidgetFactory(dataprocess.CWidgetFactory):
+class InferYolactWidgetFactory(dataprocess.CWidgetFactory):
 
     def __init__(self):
         dataprocess.CWidgetFactory.__init__(self)
         # Set the name of the process -> it must be the same as the one declared in the process factory class
-        self.name = "Yolact"
+        self.name = "infer_yolact"
 
     def create(self, param):
         # Create widget object
-        return YolactWidget(param, None)
+        return InferYolactWidget(param, None)
