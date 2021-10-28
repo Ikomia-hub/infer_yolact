@@ -325,7 +325,7 @@ def log_sum_exp(x):
     return torch.log(torch.sum(torch.exp(x-x_max), 1)) + x_max
 
 
-@torch.jit.script
+#@torch.jit.script
 def sanitize_coordinates(_x1, _x2, img_size:int, padding:int=0, cast:bool=True):
     """
     Sanitizes the input coordinates so that x1 < x2, x1 != x2, x1 >= 0, and x2 <= image_size.
