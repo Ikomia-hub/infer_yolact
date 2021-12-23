@@ -53,6 +53,7 @@ class InferYolact(dataprocess.C2dImageTask):
         self.addOutput(dataprocess.CImageIO(core.IODataType.IMAGE))
         # Add graphics output
         self.addOutput(dataprocess.CGraphicsOutput())
+        self.addOutput(dataprocess.CBlobMeasureIO())
         self.net = None
         self.class_names = []
 
@@ -89,9 +90,11 @@ class InferYolact(dataprocess.C2dImageTask):
         graphics_output = self.getOutput(2)
         graphics_output.setNewLayer("Yolact")
         graphics_output.setImageIndex(1)
+        numeric_output = self.getOutput(3)
+        numeric_output.clearData()
 
         # Inference
-        mask, colorvec = yw.forward(src_img, param, graphics_output)
+        mask, colorvec = yw.forward(src_img, param, graphics_output, numeric_output)
 
         # Step progress bar:
         self.emitStepProgress()
@@ -141,7 +144,7 @@ class InferYolactFactory(dataprocess.CTaskFactory):
                                 "close to the state-of-the-art approaches while still running at real-time."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Segmentation"
-        self.info.version = "1.0.1"
+        self.info.version = "1.1.0"
         self.info.iconPath = "icon/icon.png"
         self.info.authors = "Daniel Bolya, Chong Zhou, Fanyi Xiao, Yong Jae Lee"
         self.info.article = "YOLACT++: Better Real-time Instance Segmentation"
