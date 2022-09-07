@@ -49,11 +49,7 @@ class InferYolact(dataprocess.C2dImageTask):
         dataprocess.C2dImageTask.__init__(self, name)
         
         # Add input/output of the process here
-        self.setOutputDataType(core.IODataType.IMAGE_LABEL, 0)
-        self.addOutput(dataprocess.CImageIO(core.IODataType.IMAGE))
-        # Add graphics output
-        self.addOutput(dataprocess.CGraphicsOutput())
-        self.addOutput(dataprocess.CBlobMeasureIO())
+        self.addOutput(dataprocess.CInstanceSegIO())
         self.net = None
         self.class_names = []
 
@@ -82,30 +78,25 @@ class InferYolact(dataprocess.C2dImageTask):
         # Get input :
         img_input = self.getInput(0)
         src_img = img_input.getImage()
+        h, w, _ = src_img.shape
 
         # Get parameters :
         param = self.getParam()
 
-        # Init graphics output
-        graphics_output = self.getOutput(2)
-        graphics_output.setNewLayer("Yolact")
-        graphics_output.setImageIndex(1)
-        numeric_output = self.getOutput(3)
-        numeric_output.clearData()
+        # Init instance segmentation output
+        instance_output = self.getOutput(1)
+        instance_output.init("Yolact", 0, w, h)
 
         # Inference
-        mask, colorvec = yw.forward(src_img, param, graphics_output, numeric_output)
+        colors = yw.forward(src_img, param, instance_output)
 
         # Step progress bar:
         self.emitStepProgress()
 
-        # Get mask output :
-        mask_output = self.getOutput(0)
-        mask_output.setImage(mask)
-        self.setOutputColorMap(1, 0, colorvec)
+        self.setOutputColorMap(0, 1, colors)
 
         # Get image output :
-        self.forwardInputImage(0, 1)
+        self.forwardInputImage(0, 0)
 
         # Step progress bar:
         self.emitStepProgress()
@@ -144,7 +135,7 @@ class InferYolactFactory(dataprocess.CTaskFactory):
                                 "close to the state-of-the-art approaches while still running at real-time."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Segmentation"
-        self.info.version = "1.1.0"
+        self.info.version = "1.2.0"
         self.info.iconPath = "icon/icon.png"
         self.info.authors = "Daniel Bolya, Chong Zhou, Fanyi Xiao, Yong Jae Lee"
         self.info.article = "YOLACT++: Better Real-time Instance Segmentation"

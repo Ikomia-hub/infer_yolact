@@ -12,7 +12,7 @@ from infer_yolact.yolact_git.layers.output_utils import postprocess
 color_cache = defaultdict(lambda: {})
 
 
-def forward(src_img, param, graphics_output, numeric_output):
+def forward(src_img, param, instance_output):
     img_numpy = None
     use_cuda = False
     if param.device == "cuda":
@@ -49,9 +49,9 @@ def forward(src_img, param, graphics_output, numeric_output):
             batch = FastBaseTransformCPU()(frame.unsqueeze(0))
 
         predictions = net(batch)
-        img_numpy = manage_outputs(predictions, frame, param, graphics_output, numeric_output)
+        colors = manage_outputs(predictions, frame, param, instance_output)
 
-    return img_numpy
+    return colors
 
 
 def init_config(param):
@@ -63,12 +63,8 @@ def init_config(param):
 
 # Most parts come from function prep_display from yolact_git/eval.py
 # Without command line arguments
-def manage_outputs(predictions, img, param, graphics_output, numeric_output):
+def manage_outputs(predictions, img, param, instance_output):
     crop_mask = True
-    display_masks = True
-    display_text = True
-    display_bboxes = True
-    display_scores = True
 
     # Put values in range [0 - 1]
     h, w, _ = img.shape
@@ -117,62 +113,25 @@ def manage_outputs(predictions, img, param, graphics_output, numeric_output):
     # First, draw the masks on the GPU where we can do it really fast
     # Beware: very fast but possibly unintelligible mask-drawing code ahead
     # I wish I had access to OpenGL or Vulkan but alas, I guess Pytorch tensor operations will have to suffice
-    if display_masks and cfg.eval_mask_branch and num_dets_to_consider > 0:
+    if cfg.eval_mask_branch and num_dets_to_consider > 0:
         # After this, mask is of size [num_dets, h, w, 1]
         masks = masks[:num_dets_to_consider, :, :, None]
 
-        # Cumulative mask
-        # For each object, we create a mask with label values for display purpose
-        # For overlapping objects, we take those with the better probability with a MAX operator
-        # that's why we reverse the mask weights
-        mask_or = masks[0]*num_dets_to_consider
-        for j in range(1, num_dets_to_consider):
-            mask_or = torch.max(mask_or, masks[j] * (num_dets_to_consider-j))
-
-        # Get the numpy array of the mask
-        mask_numpy = mask_or.byte().cpu().numpy()
-
-    colorvec = [[0, 0, 0]]
+    colors = [[0, 0, 0]]
 
     if num_dets_to_consider == 0:
-        return mask_numpy, colorvec
+        return colors
 
-    if display_text or display_bboxes:
-        for j in reversed(range(num_dets_to_consider)):
-            x1, y1, x2, y2 = boxes[j, :]
-            color = get_color(j)
-            colorvec.append(list(color))
-            score = scores[j]
-            _class = cfg.dataset.class_names[classes[j]]
+    for j in range(num_dets_to_consider):
+        x1, y1, x2, y2 = boxes[j, :]
+        color = get_color(j+1)
+        colors.append(list(color))
+        score = scores[j]
+        _class = cfg.dataset.class_names[classes[j]]
+        instance_output.addInstance(j, _class, float(score),
+                                    float(x1), float(y1), float(x2-x1), float(y2-y1),
+                                    masks[j].byte().cpu().numpy(), list(color))
 
-            if display_bboxes:
-                rect_prop = core.GraphicsRectProperty()
-                rect_prop.pen_color = list(color)
-                graphics_box = graphics_output.addRectangle(float(x1), float(y1), float(x2-x1), float(y2-y1), rect_prop)
-                graphics_box.setCategory(_class)
-
-            if display_text:
-                text_str = '%s: %.2f' % (_class, score) if display_scores else _class
-                text_prop = core.GraphicsTextProperty()
-                text_prop.font_size = 8
-                text_prop.color = list(color)
-                text_prop.bold = True
-                graphics_output.addText(text_str, float(x1), float(y1), text_prop)
-
-            # object results
-            results = []
-            confidence_data = dataprocess.CObjectMeasure(dataprocess.CMeasure(core.MeasureId.CUSTOM, "Confidence"),
-                                                         float(score),
-                                                         graphics_box.getId(),
-                                                         _class)
-            box_data = dataprocess.CObjectMeasure(dataprocess.CMeasure(core.MeasureId.BBOX),
-                                                  [float(x1), float(y1), float(x2-x1), float(y2-y1)],
-                                                  graphics_box.getId(),
-                                                  _class)
-            results.append(confidence_data)
-            results.append(box_data)
-            numeric_output.addObjectMeasures(results)
-
-    return mask_numpy, colorvec
+    return colors
 
 
