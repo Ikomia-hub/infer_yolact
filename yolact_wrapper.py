@@ -128,7 +128,7 @@ def manage_outputs(predictions, img, param, instance_output):
         colors.append(list(color))
         score = scores[j]
         _class = cfg.dataset.class_names[classes[j]]
-        instance_output.addInstance(0, j, _class, float(score),
+        instance_output.addInstance(j, 0, j, _class, float(score),
                                     float(x1), float(y1), float(x2-x1), float(y2-y1),
                                     masks[j].byte().cpu().numpy(), list(color))
 
