@@ -1,4 +1,4 @@
-from ikomia import core, dataprocess
+from ikomia import utils, core, dataprocess
 import copy
 import os
 import infer_yolact.yolact_wrapper as yw
@@ -88,6 +88,11 @@ class InferYolact(dataprocess.C2dImageTask):
         instance_output.init("Yolact", 0, w, h)
 
         # Inference
+        if not os.path.exists(param.model_path):
+            print("Downloading model, please wait...")
+            model_url = utils.getModelHubUrl() + "/" + self.name + "/yolact_im700_54_800000.pth"
+            self.download(model_url, param.model_path)
+
         colors = yw.forward(src_img, param, instance_output)
 
         # Step progress bar:
@@ -135,7 +140,7 @@ class InferYolactFactory(dataprocess.CTaskFactory):
                                 "close to the state-of-the-art approaches while still running at real-time."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Segmentation"
-        self.info.version = "1.2.0"
+        self.info.version = "1.3.0"
         self.info.iconPath = "icon/icon.png"
         self.info.authors = "Daniel Bolya, Chong Zhou, Fanyi Xiao, Yong Jae Lee"
         self.info.article = "YOLACT++: Better Real-time Instance Segmentation"
