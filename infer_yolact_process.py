@@ -2,6 +2,7 @@ from ikomia import utils, core, dataprocess
 import copy
 import os
 import infer_yolact.yolact_wrapper as yw
+from infer_yolact.yolact_git.data import cfg
 
 
 # --------------------
@@ -20,44 +21,44 @@ class InferYolactParam(core.CWorkflowTaskParam):
         self.mask_alpha = 0.45
         self.device = "cuda"
 
-    def setParamMap(self, param_map):
+    def set_values(self, params):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
-        self.confidence = float(param_map["confidence"])
-        self.top_k = float(param_map["top_k"])
-        self.mask_alpha = float(param_map["mask_alpha"])
-        self.device = param_map["device"]
+        self.confidence = float(params["confidence"])
+        self.top_k = float(params["top_k"])
+        self.mask_alpha = float(params["mask_alpha"])
+        self.device = params["device"]
 
-    def getParamMap(self):
+    def get_values(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
-        param_map = core.ParamMap()
-        param_map["confidence"] = str(self.confidence)
-        param_map["top_k"] = str(self.top_k)
-        param_map["mask_alpha"] = str(self.mask_alpha)
-        param_map["device"] = self.device
-        return param_map
+        params = {
+            "confidence": str(self.confidence),
+            "top_k": str(self.top_k),
+            "mask_alpha": str(self.mask_alpha),
+            "device": self.device
+            }
+        return params
 
 
 # --------------------
 # - Class which implements the process
 # - Inherits core.CProtocolTask or derived from Ikomia API
 # --------------------
-class InferYolact(dataprocess.C2dImageTask):
+class InferYolact(dataprocess.CInstanceSegmentationTask):
 
     def __init__(self, name, param):
-        dataprocess.C2dImageTask.__init__(self, name)
+        dataprocess.CInstanceSegmentationTask.__init__(self, name)
         
         # Add input/output of the process here
-        self.addOutput(dataprocess.CInstanceSegIO())
         self.net = None
         self.class_names = []
 
         # Create parameters class
         if param is None:
-            self.setParam(InferYolactParam())
+            self.set_param_object(InferYolactParam())
         else:
-            self.setParam(copy.deepcopy(param))
+            self.set_param_object(copy.deepcopy(param))
 
         # Load class names
         model_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
@@ -65,49 +66,58 @@ class InferYolact(dataprocess.C2dImageTask):
             for row in f:
                 self.class_names.append(row[:-1])
 
-    def getProgressSteps(self):
+    def get_progress_steps(self):
         # Function returning the number of progress steps for this process
         # This is handled by the main progress bar of Ikomia application
         return 2
 
     def run(self):
         # Core function of your process
-        # Call beginTaskRun for initialization
-        self.beginTaskRun()
+        # Call begin_task_run for initialization
+        self.begin_task_run()
 
         # Get input :
-        img_input = self.getInput(0)
-        src_img = img_input.getImage()
+        img_input = self.get_input(0)
+        src_img = img_input.get_image()
         h, w, _ = src_img.shape
 
         # Get parameters :
-        param = self.getParam()
+        param = self.get_param_object()
 
         # Init instance segmentation output
-        instance_output = self.getOutput(1)
+        instance_output = self.get_output(1)
         instance_output.init("Yolact", 0, w, h)
 
         # Inference
         if not os.path.exists(param.model_path):
             print("Downloading model, please wait...")
-            model_url = utils.getModelHubUrl() + "/" + self.name + "/yolact_im700_54_800000.pth"
+            model_url = utils.get_model_hub_url() + "/" + self.name + "/yolact_im700_54_800000.pth"
+            #model_url = utils.getModelHubUrl() + "/" + self.name + "/yolact_im700_54_800000.pth"
             self.download(model_url, param.model_path)
 
-        colors = yw.forward(src_img, param, instance_output)
+        num_dets_to_consider, masks, scores, boxes, classes = yw.forward(
+                                                                    src_img,
+                                                                    param,
+                                                                    instance_output
+                                                                         )
+        self.set_names(list(cfg.dataset.class_names))
+        names = list(cfg.dataset.class_names)
+        for j in range(num_dets_to_consider):
+            x1, y1, x2, y2 = boxes[j, :]
+            score = scores[j]
+            idx = names.index(cfg.dataset.class_names[classes[j]])
+            self.add_instance(j, 0, idx, float(score),
+                                float(x1), float(y1), float(x2-x1), float(y2-y1),
+                                masks[j].byte().cpu().numpy())
 
         # Step progress bar:
-        self.emitStepProgress()
-
-        self.setOutputColorMap(0, 1, colors)
-
-        # Get image output :
-        self.forwardInputImage(0, 0)
+        self.emit_step_progress()
 
         # Step progress bar:
-        self.emitStepProgress()
+        self.emit_step_progress()
 
-        # Call endTaskRun to finalize process
-        self.endTaskRun()
+        # Call end_task_run to finalize process
+        self.end_task_run()
 
 
 # --------------------
@@ -120,7 +130,7 @@ class InferYolactFactory(dataprocess.CTaskFactory):
         dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
         self.info.name = "infer_yolact"
-        self.info.shortDescription = "A simple, fully convolutional model for real-time instance segmentation."
+        self.info.short_description = "A simple, fully convolutional model for real-time instance segmentation."
         self.info.description = "We present a simple, fully-convolutional model for real-time (>30 fps) instance " \
                                 "segmentation that achieves competitive results on MS COCO evaluated on a single " \
                                 "Titan Xp, which is significantly faster than any previous state-of-the-art approach. " \
@@ -141,13 +151,13 @@ class InferYolactFactory(dataprocess.CTaskFactory):
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Segmentation"
         self.info.version = "1.3.0"
-        self.info.iconPath = "icon/icon.png"
+        self.info.icon_path = "icon/icon.png"
         self.info.authors = "Daniel Bolya, Chong Zhou, Fanyi Xiao, Yong Jae Lee"
         self.info.article = "YOLACT++: Better Real-time Instance Segmentation"
         self.info.journal = "ICCV"
         self.info.year = 2019
         self.info.license = "MIT License"
-        self.info.documentationLink = "https://arxiv.org/abs/1912.06218"
+        self.info.documentation_link = "https://arxiv.org/abs/1912.06218"
         self.info.repository = "https://github.com/dbolya/yolact"
         self.info.keywords = "CNN,detection,instance,segmentation,semantic,resnet"
 

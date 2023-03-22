@@ -65,9 +65,9 @@ class InferYolactWidget(core.CWorkflowTaskWidget):
         layout_ptr = qtconversion.PyQtToQt(self.grid_layout)
 
         # Set widget layout
-        self.setLayout(layout_ptr)
+        self.set_layout(layout_ptr)
 
-    def onApply(self):
+    def on_apply(self):
         # Apply button clicked slot
         # Get parameters from widget
         self.parameters.confidence = self.spin_confidence.value()
@@ -79,7 +79,7 @@ class InferYolactWidget(core.CWorkflowTaskWidget):
             self.parameters.device = "cpu"
 
         # Send signal to launch the process
-        self.emitApply(self.parameters)
+        self.emit_apply(self.parameters)
 
 
 # --------------------

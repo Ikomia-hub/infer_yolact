@@ -117,21 +117,4 @@ def manage_outputs(predictions, img, param, instance_output):
         # After this, mask is of size [num_dets, h, w, 1]
         masks = masks[:num_dets_to_consider, :, :, None]
 
-    colors = [[0, 0, 0]]
-
-    if num_dets_to_consider == 0:
-        return colors
-
-    for j in range(num_dets_to_consider):
-        x1, y1, x2, y2 = boxes[j, :]
-        color = get_color(j+1)
-        colors.append(list(color))
-        score = scores[j]
-        _class = cfg.dataset.class_names[classes[j]]
-        instance_output.addInstance(j, 0, j, _class, float(score),
-                                    float(x1), float(y1), float(x2-x1), float(y2-y1),
-                                    masks[j].byte().cpu().numpy(), list(color))
-
-    return colors
-
-
+    return num_dets_to_consider, masks, scores, boxes, classes
