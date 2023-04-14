@@ -16,27 +16,27 @@ class InferYolactParam(core.CWorkflowTaskParam):
         # Place default value initialization here        
         models_folder = os.path.dirname(os.path.realpath(__file__)) + "/models"
         self.model_path = models_folder + "/yolact_im700_54_800000.pth"
-        self.confidence = 0.15
+        self.conf_thres = 0.15
         self.top_k = 15
         self.mask_alpha = 0.45
-        self.device = "cuda"
+        self.cuda = "cuda"
 
     def set_values(self, params):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
-        self.confidence = float(params["confidence"])
+        self.conf_thres = float(params["conf_thres"])
         self.top_k = float(params["top_k"])
         self.mask_alpha = float(params["mask_alpha"])
-        self.device = params["device"]
+        self.cuda = params["cuda"]
 
     def get_values(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
         params = {
-            "confidence": str(self.confidence),
+            "conf_thres": str(self.conf_thres),
             "top_k": str(self.top_k),
             "mask_alpha": str(self.mask_alpha),
-            "device": self.device
+            "cuda": self.cuda
             }
         return params
 

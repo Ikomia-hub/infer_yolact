@@ -23,12 +23,12 @@ class InferYolactWidget(core.CWorkflowTaskWidget):
         self.grid_layout = QGridLayout()
 
         # Confidence
-        label_confidence = QLabel("Confidence")
-        self.spin_confidence = QDoubleSpinBox()
-        self.spin_confidence.setRange(0, 1)
-        self.spin_confidence.setSingleStep(0.05)
-        self.spin_confidence.setDecimals(2)
-        self.spin_confidence.setValue(self.parameters.confidence)
+        label_conf_thres = QLabel("Confidence")
+        self.spin_conf_thres = QDoubleSpinBox()
+        self.spin_conf_thres.setRange(0, 1)
+        self.spin_conf_thres.setSingleStep(0.05)
+        self.spin_conf_thres.setDecimals(2)
+        self.spin_conf_thres.setValue(self.parameters.conf_thres)
 
         # Predictions count
         label_pred_count = QLabel("Max predictions count")
@@ -46,15 +46,15 @@ class InferYolactWidget(core.CWorkflowTaskWidget):
         self.spin_mask_alpha.setValue(self.parameters.mask_alpha)
 
         # Device
-        self.checkbox = QCheckBox("CUDA")
-        if self.parameters.device == "cuda":
+        self.checkbox = QCheckBox("Cuda")
+        if self.parameters.cuda == "cuda":
             self.checkbox.setChecked(True)
         else:
             self.checkbox.setChecked(False)
 
         # Fill layout
-        self.grid_layout.addWidget(label_confidence, 0, 0, 1, 1)
-        self.grid_layout.addWidget(self.spin_confidence, 0, 1, 1, 1)
+        self.grid_layout.addWidget(label_conf_thres, 0, 0, 1, 1)
+        self.grid_layout.addWidget(self.spin_conf_thres, 0, 1, 1, 1)
         self.grid_layout.addWidget(label_pred_count, 1, 0, 1, 1)
         self.grid_layout.addWidget(self.spin_pred_count, 1, 1, 1, 1)
         self.grid_layout.addWidget(label_mask_alpha, 2, 0, 1, 1)
@@ -70,13 +70,13 @@ class InferYolactWidget(core.CWorkflowTaskWidget):
     def on_apply(self):
         # Apply button clicked slot
         # Get parameters from widget
-        self.parameters.confidence = self.spin_confidence.value()
+        self.parameters.conf_thres = self.spin_conf_thres.value()
         self.parameters.top_k = self.spin_pred_count.value()
         self.parameters.mask_alpha = self.spin_mask_alpha.value()
         if self.checkbox.isChecked():
-            self.parameters.device = "cuda"
+            self.parameters.cuda = "cuda"
         else:
-            self.parameters.device = "cpu"
+            self.parameters.cuda = "cpu"
 
         # Send signal to launch the process
         self.emit_apply(self.parameters)

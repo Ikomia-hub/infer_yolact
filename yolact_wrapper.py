@@ -15,7 +15,7 @@ color_cache = defaultdict(lambda: {})
 def forward(src_img, param, instance_output):
     img_numpy = None
     use_cuda = False
-    if param.device == "cuda":
+    if param.cuda == "cuda":
         use_cuda = torch.cuda.device_count() >= 1
         if not use_cuda:
             raise ValueError("No CUDA driver!")
@@ -30,7 +30,7 @@ def forward(src_img, param, instance_output):
             torch.set_default_tensor_type('torch.FloatTensor')
 
         net = Yolact()
-        device = torch.device(param.device)
+        device = torch.device(param.cuda)
         net.load_weights(param.model_path, device)
         net.eval()
 
@@ -72,7 +72,7 @@ def manage_outputs(predictions, img, param, instance_output):
     # Post-processing
     save = cfg.rescore_bbox
     cfg.rescore_bbox = True
-    t = postprocess(predictions, w, h, visualize_lincomb=False, crop_masks=crop_mask, score_threshold=param.confidence)
+    t = postprocess(predictions, w, h, visualize_lincomb=False, crop_masks=crop_mask, score_threshold=param.conf_thres)
     cfg.rescore_bbox = save
 
     # Copy
@@ -86,7 +86,7 @@ def manage_outputs(predictions, img, param, instance_output):
     # Filter available detections
     num_dets_to_consider = min(param.top_k, classes.shape[0])
     for j in range(num_dets_to_consider):
-        if scores[j] < param.confidence:
+        if scores[j] < param.conf_thres:
             num_dets_to_consider = j
             break
 
