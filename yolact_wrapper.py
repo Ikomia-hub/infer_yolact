@@ -76,7 +76,7 @@ def manage_outputs(predictions, img, param, instance_output):
     cfg.rescore_bbox = save
 
     # Copy
-    idx = t[1].argsort(0, descending=True)[:param.top_k]
+    idx = t[1].argsort(0, descending=True)[:int(param.top_k)]
     if cfg.eval_mask_branch:
         # Masks are drawn on the GPU, so don't copy
         masks = t[3][idx]

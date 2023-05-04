@@ -92,14 +92,13 @@ class InferYolact(dataprocess.CInstanceSegmentationTask):
         if not os.path.exists(param.model_path):
             print("Downloading model, please wait...")
             model_url = utils.get_model_hub_url() + "/" + self.name + "/yolact_im700_54_800000.pth"
-            #model_url = utils.getModelHubUrl() + "/" + self.name + "/yolact_im700_54_800000.pth"
             self.download(model_url, param.model_path)
 
         num_dets_to_consider, masks, scores, boxes, classes = yw.forward(
-                                                                    src_img,
-                                                                    param,
-                                                                    instance_output
-                                                                         )
+            src_img,
+            param,
+            instance_output
+        )
         self.set_names(list(cfg.dataset.class_names))
         names = list(cfg.dataset.class_names)
         for j in range(num_dets_to_consider):
