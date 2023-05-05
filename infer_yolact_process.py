@@ -105,9 +105,8 @@ class InferYolact(dataprocess.CInstanceSegmentationTask):
             x1, y1, x2, y2 = boxes[j, :]
             score = scores[j]
             idx = names.index(cfg.dataset.class_names[classes[j]])
-            self.add_instance(j, 0, idx, float(score),
-                                float(x1), float(y1), float(x2-x1), float(y2-y1),
-                                masks[j].byte().cpu().numpy())
+            self.add_object(j, 0, idx, float(score), float(x1), float(y1), float(x2-x1), float(y2-y1),
+                            masks[j].byte().cpu().numpy())
 
         # Step progress bar:
         self.emit_step_progress()
