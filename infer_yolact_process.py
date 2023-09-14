@@ -3,7 +3,7 @@ import copy
 import os
 import infer_yolact.yolact_wrapper as yw
 from infer_yolact.yolact_git.data import cfg
-
+import requests
 
 # --------------------
 # - Class to handle the process parameters
@@ -92,7 +92,11 @@ class InferYolact(dataprocess.CInstanceSegmentationTask):
         if not os.path.exists(param.model_path):
             print("Downloading model, please wait...")
             model_url = utils.get_model_hub_url() + "/" + self.name + "/yolact_im700_54_800000.pth"
-            self.download(model_url, param.model_path)
+            response = requests.get(model_url, stream=True)
+            with open(param.model_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)          
+            # self.download(model_url, param.model_path)
 
         num_dets_to_consider, masks, scores, boxes, classes = yw.forward(
             src_img,
