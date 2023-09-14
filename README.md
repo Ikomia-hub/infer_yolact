@@ -19,10 +19,9 @@
     </a> 
 </p>
 
-We present a simple, fully-convolutional model for real-time (>30 fps) instance segmentation that achieves competitive results on MS COCO evaluated on a single Titan Xp, which is significantly faster than any previous state-of-the-art approach. Moreover, we obtain this result after training on only one GPU. We accomplish this by breaking instance segmentation into two parallel subtasks: (1) generating a set of prototype masks and (2) predicting per-instance mask coefficients. Then we produce instance masks by linearly combining the prototypes with the mask coefficients. We find that because this process doesn't depend on repooling, this approach produces very high-quality masks and exhibits temporal stability for free. Furthermore, we analyze the emergent behavior of our prototypes and show they learn to localize instances on their own in a translation variant manner, despite being fully-convolutional. We also propose Fast NMS, a drop-in 12 ms faster replacement for standard NMS that only has a marginal performance penalty. Finally, by incorporating deformable convolutions into the backbone network, optimizing the prediction head with better anchor scales and aspect ratios, and adding a novel fast mask re-scoring branch, our YOLACT++ model can achieve 34.1 mAP on MS COCO at 33.5 fps, which is fairly close to the state-of-the-art approaches while still running at real-time.
+RUN YOLACT model for real-time instance segmentation. 
 
-[Insert illustrative image here. Image must be accessible publicly, in algorithm Github repository for example.
-<img src="images/illustration.png"  alt="Illustrative image" width="30%" height="30%">]
+![YOLACT illustration](https://github.com/dbolya/yolact/blob/master/data/yolact_example_2.png?raw=true)
 
 ## :rocket: Use with Ikomia API
 
@@ -36,11 +35,10 @@ pip install ikomia
 
 #### 2. Create your workflow
 
-[Change the sample image URL to fit algorithm purpose]
 
 ```python
-import ikomia
 from ikomia.dataprocess.workflow import Workflow
+from ikomia.utils.displayIO import display
 
 # Init your workflow
 wf = Workflow()
@@ -49,7 +47,10 @@ wf = Workflow()
 algo = wf.add_task(name="infer_yolact", auto_connect=True)
 
 # Run on your image  
-wf.run_on(url="example_image.png")
+wf.run_on(url="https://raw.githubusercontent.com/Ikomia-dev/notebooks/main/examples/img/img_cat.jpg")
+
+# Inpect your result
+display(algo.get_image_with_mask_and_graphics())
 ```
 
 ## :sunny: Use with Ikomia Studio
@@ -62,13 +63,17 @@ Ikomia Studio offers a friendly UI with the same features as the API.
 
 ## :pencil: Set algorithm parameters
 
-[Explain each algorithm parameters]
 
-[Change the sample image URL to fit algorithm purpose]
+- **conf_thres** (float) default '0.15': Box threshold for the prediction [0,1]
+- **top_k** (float) - default '15'
+- **mask_alpha** (float) - default '0.45'
+
+**Parameters** should be in **strings format**  when added to the dictionary.
+
 
 ```python
-import ikomia
 from ikomia.dataprocess.workflow import Workflow
+from ikomia.utils.displayIO import display
 
 # Init your workflow
 wf = Workflow()
@@ -77,14 +82,16 @@ wf = Workflow()
 algo = wf.add_task(name="infer_yolact", auto_connect=True)
 
 algo.set_parameters({
-    "param1": "value1",
-    "param2": "value2",
-    ...
+    "conf_thres": "0.5",
+    "top_k": "10",
+    "mask_alpha": "0.45",
 })
 
 # Run on your image  
-wf.run_on(url="example_image.png")
+wf.run_on(url="https://raw.githubusercontent.com/Ikomia-dev/notebooks/main/examples/img/img_cat.jpg")
 
+# Inpect your result
+display(algo.get_image_with_mask_and_graphics())
 ```
 
 ## :mag: Explore algorithm outputs
@@ -102,16 +109,12 @@ wf = Workflow()
 algo = wf.add_task(name="infer_yolact", auto_connect=True)
 
 # Run on your image  
-wf.run_on(url="example_image.png")
+wf.run_on(url="https://raw.githubusercontent.com/Ikomia-dev/notebooks/main/examples/img/img_cat.jpg")
 
 # Iterate over outputs
-for output in algo.get_outputs()
+for output in algo.get_outputs():
     # Print information
     print(output)
     # Export it to JSON
     output.to_json()
 ```
-
-## :fast_forward: Advanced usage 
-
-[optional]
