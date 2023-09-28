@@ -84,8 +84,8 @@ def manage_outputs(predictions, img, param, instance_output):
     classes, scores, boxes = [x[idx].cpu().numpy() for x in t[:3]]
 
     # Filter available detections
-    num_dets_to_consider = min(param.top_k, classes.shape[0])
-    for j in range(num_dets_to_consider):
+    num_dets_to_consider = min(int(param.top_k), classes.shape[0])
+    for j in range(int(num_dets_to_consider)):
         if scores[j] < param.conf_thres:
             num_dets_to_consider = j
             break
