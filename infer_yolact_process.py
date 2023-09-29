@@ -146,6 +146,8 @@ class InferYolactFactory(dataprocess.CTaskFactory):
         self.info.repository = "https://github.com/Ikomia-hub/infer_yolact"
         self.info.original_repository = "https://github.com/dbolya/yolact"
         self.info.keywords = "CNN,detection,instance,segmentation,semantic,resnet"
+        self.info.algo_type = core.AlgoType.INFER
+        self.info.algo_tasks = "INSTANCE_SEGMENTATION"
 
     def create(self, param=None):
         # Create process object
