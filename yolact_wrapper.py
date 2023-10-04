@@ -7,7 +7,7 @@ from infer_yolact.yolact_git.utils.functions import SavePath
 from infer_yolact.yolact_git.utils.augmentations import FastBaseTransform, FastBaseTransformCPU
 from infer_yolact.yolact_git.data import cfg, set_cfg, COLORS
 from infer_yolact.yolact_git.layers.output_utils import postprocess
-
+import torch
 
 color_cache = defaultdict(lambda: {})
 
@@ -15,10 +15,11 @@ color_cache = defaultdict(lambda: {})
 def forward(src_img, param, instance_output):
     img_numpy = None
     use_cuda = False
-    if param.cuda == "cuda":
-        use_cuda = torch.cuda.device_count() >= 1
-        if not use_cuda:
-            raise ValueError("No CUDA driver!")
+    if torch.cuda.is_available():
+        if param.cuda == "cuda":
+            use_cuda = torch.cuda.device_count() >= 1
+            if not use_cuda:
+                raise ValueError("No CUDA driver!")
     
     init_config(param)
 
@@ -30,7 +31,7 @@ def forward(src_img, param, instance_output):
             torch.set_default_tensor_type('torch.FloatTensor')
 
         net = Yolact()
-        device = torch.device(param.cuda)
+        device = torch.device("cuda") if param.cuda and torch.cuda.is_available() else torch.device("cpu")
         net.load_weights(param.model_path, device)
         net.eval()
 
