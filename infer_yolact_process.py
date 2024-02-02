@@ -135,7 +135,7 @@ class InferYolactFactory(dataprocess.CTaskFactory):
         self.info.short_description = "A simple, fully convolutional model for real-time instance segmentation."
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Segmentation"
-        self.info.version = "1.3.0"
+        self.info.version = "1.3.1"
         self.info.icon_path = "icon/icon.png"
         self.info.authors = "Daniel Bolya, Chong Zhou, Fanyi Xiao, Yong Jae Lee"
         self.info.article = "YOLACT++: Better Real-time Instance Segmentation"
